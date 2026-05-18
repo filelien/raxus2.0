@@ -37,7 +37,7 @@ docker compose up --build
 Linux :
 
 ```bash
-APP_DIR=/u02/raxus2.0 REPO_URL=git@github.com:filelien/raxus2.0.git BRANCH=main sh scripts/deploy.sh
+APP_DIR=/u02/raxus2.0 REPO_URL=https://github.com/filelien/raxus2.0.git BRANCH=main sh scripts/deploy.sh
 ```
 
 Windows PowerShell :
@@ -56,7 +56,17 @@ ces secrets GitHub sont configurés :
 - `NIMBUS_DEPLOY_PORT` optionnel
 - `NIMBUS_APP_DIR` optionnel, par défaut `/u02/raxus2.0`
 
-### Préparer l’accès GitHub SSH sur le serveur
+### Déploiement dans `/u02`
+
+Le dépôt public peut être cloné sans clé GitHub :
+
+```bash
+git clone https://github.com/filelien/raxus2.0.git /u02/raxus2.0
+cd /u02/raxus2.0
+sh scripts/deploy.sh
+```
+
+### Préparer l’accès GitHub SSH sur le serveur, optionnel
 
 Si `git clone git@github.com:filelien/raxus2.0.git` renvoie
 `Permission denied (publickey)`, le serveur n’a pas encore de clé SSH autorisée
@@ -89,7 +99,7 @@ EOF
 ssh -T git@github.com
 git clone git@github.com:filelien/raxus2.0.git /u02/raxus2.0
 cd /u02/raxus2.0
-sh scripts/deploy.sh
+REPO_URL=git@github.com:filelien/raxus2.0.git sh scripts/deploy.sh
 ```
 
 ## Stratégie offline

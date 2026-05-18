@@ -2,7 +2,7 @@
 set -eu
 
 APP_DIR="${APP_DIR:-/u02/raxus2.0}"
-REPO_URL="${REPO_URL:-git@github.com:filelien/raxus2.0.git}"
+REPO_URL="${REPO_URL:-https://github.com/filelien/raxus2.0.git}"
 BRANCH="${BRANCH:-main}"
 
 if ! command -v git >/dev/null 2>&1; then
