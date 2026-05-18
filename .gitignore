@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+dist
+coverage
+nimbus-offline
+.turbo
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+Dockerfile.local

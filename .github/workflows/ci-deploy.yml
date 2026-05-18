@@ -1,0 +1,66 @@
+name: CI and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    name: Validate frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Build Docker image
+        run: docker compose build frontend
+
+  deploy:
+    name: Deploy remote server
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      NIMBUS_DEPLOY_HOST: ${{ secrets.NIMBUS_DEPLOY_HOST }}
+      NIMBUS_APP_DIR: ${{ secrets.NIMBUS_APP_DIR }}
+    steps:
+      - name: Deploy over SSH
+        if: env.NIMBUS_DEPLOY_HOST != ''
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.NIMBUS_DEPLOY_HOST }}
+          username: ${{ secrets.NIMBUS_DEPLOY_USER }}
+          key: ${{ secrets.NIMBUS_DEPLOY_KEY }}
+          port: ${{ secrets.NIMBUS_DEPLOY_PORT || 22 }}
+          script: |
+            export APP_DIR="${NIMBUS_APP_DIR:-/opt/nimbus}"
+            export REPO_URL="git@github.com:filelien/raxus2.0.git"
+            export BRANCH="main"
+            if [ ! -d "$APP_DIR/.git" ]; then
+              mkdir -p "$APP_DIR"
+              git clone "$REPO_URL" "$APP_DIR"
+            fi
+            cd "$APP_DIR"
+            git fetch origin "$BRANCH"
+            git checkout "$BRANCH"
+            git pull --ff-only origin "$BRANCH"
+            [ -f .env ] || cp .env.example .env
+            docker compose up --build -d
+            docker compose ps
