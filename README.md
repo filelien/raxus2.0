@@ -37,7 +37,7 @@ docker compose up --build
 Linux :
 
 ```bash
-APP_DIR=/opt/nimbus REPO_URL=git@github.com:filelien/raxus2.0.git BRANCH=main sh scripts/deploy.sh
+APP_DIR=/u02/raxus2.0 REPO_URL=git@github.com:filelien/raxus2.0.git BRANCH=main sh scripts/deploy.sh
 ```
 
 Windows PowerShell :
@@ -54,7 +54,43 @@ ces secrets GitHub sont configurés :
 - `NIMBUS_DEPLOY_USER`
 - `NIMBUS_DEPLOY_KEY`
 - `NIMBUS_DEPLOY_PORT` optionnel
-- `NIMBUS_APP_DIR` optionnel, par défaut `/opt/nimbus`
+- `NIMBUS_APP_DIR` optionnel, par défaut `/u02/raxus2.0`
+
+### Préparer l’accès GitHub SSH sur le serveur
+
+Si `git clone git@github.com:filelien/raxus2.0.git` renvoie
+`Permission denied (publickey)`, le serveur n’a pas encore de clé SSH autorisée
+sur GitHub.
+
+Sur le serveur :
+
+```bash
+ssh-keygen -t ed25519 -C "nimbus-ubuntu-217.160.12.142" -f ~/.ssh/nimbus_github -N ""
+cat ~/.ssh/nimbus_github.pub
+```
+
+Ajoute ensuite la clé publique affichée dans GitHub :
+
+```text
+Repository raxus2.0 > Settings > Deploy keys > Add deploy key
+```
+
+Coche `Allow write access` si le serveur doit aussi pousser du code. Puis :
+
+```bash
+cat >> ~/.ssh/config <<'EOF'
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/nimbus_github
+  IdentitiesOnly yes
+EOF
+
+ssh -T git@github.com
+git clone git@github.com:filelien/raxus2.0.git /u02/raxus2.0
+cd /u02/raxus2.0
+sh scripts/deploy.sh
+```
 
 ## Stratégie offline
 

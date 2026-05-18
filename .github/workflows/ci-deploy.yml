@@ -50,7 +50,7 @@ jobs:
           key: ${{ secrets.NIMBUS_DEPLOY_KEY }}
           port: ${{ secrets.NIMBUS_DEPLOY_PORT || 22 }}
           script: |
-            export APP_DIR="${NIMBUS_APP_DIR:-/opt/nimbus}"
+            export APP_DIR="${NIMBUS_APP_DIR:-/u02/raxus2.0}"
             export REPO_URL="git@github.com:filelien/raxus2.0.git"
             export BRANCH="main"
             if [ ! -d "$APP_DIR/.git" ]; then
